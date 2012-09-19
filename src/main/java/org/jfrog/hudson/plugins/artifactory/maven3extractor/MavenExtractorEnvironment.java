@@ -123,7 +123,8 @@ public class MavenExtractorEnvironment extends Environment {
 
         if (!initialized) {
             try {
-                mavenConfig.setMavenOpts(appendNewMavenOpts());
+                //TODO currently Maven should be patched with our extractor manually.
+             //   mavenConfig.setMavenOpts(appendNewMavenOpts());
 
                 PublisherContext publisherContext = null;
                 if (wrapper != null) {
