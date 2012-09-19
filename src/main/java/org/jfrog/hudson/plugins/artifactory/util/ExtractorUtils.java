@@ -52,7 +52,7 @@ public class ExtractorUtils {
 
     /**
      * Flag to indicate whether an external extractor was used, and the work doesn't need to be done from inside
-     * Jenkins.
+     * Hudson.
      */
     public static final String EXTRACTOR_USED = "extractor.used";
 
@@ -62,10 +62,10 @@ public class ExtractorUtils {
     }
 
     /**
-     * Get the VCS revision from the Jenkins build environment. The search will one of "SVN_REVISION", "GIT_COMMIT",
+     * Get the VCS revision from the Hudson build environment. The search will one of "SVN_REVISION", "GIT_COMMIT",
      * "P4_CHANGELIST" in the environment.
      *
-     * @param env Th Jenkins build environment.
+     * @param env The Hudson build environment.
      * @return The vcs revision for supported VCS
      */
     public static String getVcsRevision(Map<String, String> env) {
@@ -170,7 +170,7 @@ public class ExtractorUtils {
         userName = ActionableHelper.getUserCausePrincipal(build, userName);
 
         configuration.info.setPrincipal(userName);
-        configuration.info.setAgentName("Jenkins");
+        configuration.info.setAgentName("Hudson");
         configuration.info.setAgentVersion(build.getHudsonVersion());
         ArtifactoryServer artifactoryServer = context.getArtifactoryServer();
         Credentials preferredDeployer =
@@ -320,12 +320,12 @@ public class ExtractorUtils {
         IncludeExcludePatterns patterns = new IncludeExcludePatterns(envVarsPatterns.getIncludePatterns(),
                 envVarsPatterns.getExcludePatterns());
 
-        // Add only the jenkins specific environment variables
+        // Add only the Hudson specific environment variables
         MapDifference<String, String> envDifference = Maps.difference(env, System.getenv());
         Map<String, String> filteredEnvDifference = envDifference.entriesOnlyOnLeft();
         configuration.info.addBuildVariables(filteredEnvDifference, patterns);
 
-        // Add Jenkins build variables
+        // Add Hudson build variables
         Map<String, String> buildVariables = build.getBuildVariables();
         MapDifference<String, String> buildVarDifference = Maps.difference(buildVariables, System.getenv());
         Map<String, String> filteredBuildVarDifferences = buildVarDifference.entriesOnlyOnLeft();
