@@ -15,11 +15,11 @@
                     <j:set var="deployerCredentials" value="${server.deployerCredentials}"/>
                     <f:section title="Default Deployer Credentials" name="deployerCredentials">
                         <input type="hidden" name="stapler-class" value="org.jfrog.hudson.plugins.artifactory.config.Credentials"/>
-                        <f:entry title="User Name" help="/plugin/artifactory/help/common/help-deployerUserName.html"
+                        <f:entry title="User Name" help="/plugin/artifactory/help/ArtifactoryServer/help-userName.html"
                                  field="username">
                             <f:textbox value="${deployerCredentials.username}"/>
                         </f:entry>
-                        <f:entry title="Password" help="/plugin/artifactory/help/common/help-deployerPassword.html"
+                        <f:entry title="Password" help="/plugin/artifactory/help/ArtifactoryServer/help-password.html"
                                  field="password">
                             <f:password value="${deployerCredentials.password}"/>
                         </f:entry>
