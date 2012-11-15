@@ -28,6 +28,7 @@ import org.apache.commons.lang.StringUtils;
 import org.jfrog.hudson.plugins.artifactory.ArtifactoryBuilder;
 import org.jfrog.hudson.plugins.artifactory.BuildInfoAwareConfigurator;
 import org.jfrog.hudson.plugins.artifactory.DeployerOverrider;
+import org.jfrog.hudson.plugins.artifactory.ResolverOverrider;
 import org.jfrog.hudson.plugins.artifactory.action.ActionableHelper;
 import org.jfrog.hudson.plugins.artifactory.config.ArtifactoryServer;
 import org.jfrog.hudson.plugins.artifactory.config.Credentials;
@@ -45,19 +46,20 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * --publusher (start with)--
- * Freestyle Maven 3 configurator. Currently for publishing only.
+ * Freestyle Maven 3 configurator.
  *
  * @author Noam Y. Tenne
  */
-public class Maven3ExtractorWrapper extends BuildWrapper implements DeployerOverrider,
-        BuildInfoAwareConfigurator {
+public class Maven3ExtractorWrapper extends BuildWrapper implements DeployerOverrider, ResolverOverrider, BuildInfoAwareConfigurator {
 
     /**
      * Repository URL and repository to deploy artifacts to
      */
     private final ServerDetails details;
+    private final ServerDetails resolveDetails;
     private final Credentials overridingDeployerCredentials;
+
+    private final Credentials overridingResolverCredentials;
     /**
      * If checked (default) deploy maven artifacts
      */
@@ -88,16 +90,20 @@ public class Maven3ExtractorWrapper extends BuildWrapper implements DeployerOver
     private boolean aggregateBuildIssues;
     private String aggregationBuildStatus;
 
+    private final boolean resolveArtifacts;
+
     @DataBoundConstructor
-    public Maven3ExtractorWrapper(ServerDetails details, Credentials overridingDeployerCredentials,
-                                  IncludesExcludes artifactDeploymentPatterns, boolean deployArtifacts, boolean deployBuildInfo,
+    public Maven3ExtractorWrapper(ServerDetails details, ServerDetails resolveDetails, Credentials overridingDeployerCredentials,
+                                  Credentials overridingResolverCredentials, IncludesExcludes artifactDeploymentPatterns, boolean deployArtifacts, boolean deployBuildInfo,
                                   boolean includeEnvVars, IncludesExcludes envVarsPatterns,
                                   boolean runChecks, String violationRecipients, boolean includePublishArtifacts,
                                   String scopes, boolean disableLicenseAutoDiscovery, boolean discardOldBuilds,
                                   boolean discardBuildArtifacts, String matrixParams,
-                                  boolean enableIssueTrackerIntegration, boolean aggregateBuildIssues, String aggregationBuildStatus) {
+                                  boolean enableIssueTrackerIntegration, boolean aggregateBuildIssues, String aggregationBuildStatus, boolean resolveArtifacts) {
         this.details = details;
+        this.resolveDetails = resolveDetails;
         this.overridingDeployerCredentials = overridingDeployerCredentials;
+        this.overridingResolverCredentials = overridingResolverCredentials;
         this.artifactDeploymentPatterns = artifactDeploymentPatterns;
         this.envVarsPatterns = envVarsPatterns;
         this.runChecks = runChecks;
@@ -110,6 +116,7 @@ public class Maven3ExtractorWrapper extends BuildWrapper implements DeployerOver
         this.enableIssueTrackerIntegration = enableIssueTrackerIntegration;
         this.aggregateBuildIssues = aggregateBuildIssues;
         this.aggregationBuildStatus = aggregationBuildStatus;
+        this.resolveArtifacts = resolveArtifacts;
         this.licenseAutoDiscovery = !disableLicenseAutoDiscovery;
         this.deployBuildInfo = deployBuildInfo;
         this.deployArtifacts = deployArtifacts;
@@ -120,6 +127,10 @@ public class Maven3ExtractorWrapper extends BuildWrapper implements DeployerOver
 
     public ServerDetails getDetails() {
         return details;
+    }
+
+    public ServerDetails getResolveDetails() {
+        return resolveDetails;
     }
 
     public boolean isDiscardOldBuilds() {
@@ -138,8 +149,20 @@ public class Maven3ExtractorWrapper extends BuildWrapper implements DeployerOver
         return overridingDeployerCredentials;
     }
 
+    public boolean isOverridingDefaultResolver() {
+        return getOverridingResolverCredentials() != null;
+    }
+
+    public Credentials getOverridingResolverCredentials() {
+        return overridingResolverCredentials;
+    }
+
     public boolean isDeployArtifacts() {
         return deployArtifacts;
+    }
+
+    public boolean isResolveArtifacts() {
+        return resolveArtifacts;
     }
 
     public String getMatrixParams() {

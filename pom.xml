@@ -130,6 +130,11 @@
             <version>4.8.2</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>org.jvnet.hudson.plugins</groupId>
+            <artifactId>jira</artifactId>
+            <version>1.26</version>
+        </dependency>
 
     </dependencies>
 </project>

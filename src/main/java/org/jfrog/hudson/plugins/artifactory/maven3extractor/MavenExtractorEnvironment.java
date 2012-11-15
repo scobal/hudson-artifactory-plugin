@@ -28,15 +28,16 @@ import org.apache.commons.lang.StringUtils;
 import org.eclipse.hudson.api.model.IBaseBuildableProject;
 import org.hudsonci.maven.model.config.BuildConfigurationDTO;
 import org.hudsonci.maven.plugin.builder.MavenBuilder;
+import org.hudsonci.maven.plugin.builder.internal.MavenInstallationValidator;
 import org.jfrog.build.api.BuildInfoConfigProperties;
 import org.jfrog.build.client.ArtifactoryClientConfiguration;
 import org.jfrog.build.extractor.maven.BuildInfoRecorder;
+import org.jfrog.hudson.plugins.artifactory.ResolverOverrider;
 import org.jfrog.hudson.plugins.artifactory.action.ActionableHelper;
 import org.jfrog.hudson.plugins.artifactory.action.BuildInfoResultAction;
+import org.jfrog.hudson.plugins.artifactory.config.Credentials;
 import org.jfrog.hudson.plugins.artifactory.maven3extractor.config.ServerDetails;
-import org.jfrog.hudson.plugins.artifactory.util.ExtractorUtils;
-import org.jfrog.hudson.plugins.artifactory.util.PluginDependencyHelper;
-import org.jfrog.hudson.plugins.artifactory.util.PublisherContext;
+import org.jfrog.hudson.plugins.artifactory.util.*;
 
 import java.io.File;
 import java.io.IOException;
@@ -65,6 +66,7 @@ public class MavenExtractorEnvironment extends Environment {
     private AbstractBuild build;
     private Maven3ExtractorWrapper wrapper;
     private BuildListener buildListener;
+
 
     public MavenExtractorEnvironment(AbstractBuild build, Maven3ExtractorWrapper wrapper, BuildListener buildListener)
             throws IOException, InterruptedException {
@@ -110,29 +112,41 @@ public class MavenExtractorEnvironment extends Environment {
         env.put(ExtractorUtils.EXTRACTOR_USED, "true");
 
         if (classworldsConf == null && !env.containsKey(CLASSWORLDS_CONF_KEY)) {
-            URL resource = getClass().getClassLoader().getResource("org/jfrog/hudson/plugins/artifactory/maven3extractor/classworlds-freestyle.conf");
-            if (resource == null) {
-                throw new IllegalStateException("Classwords configuration file not found");
-            }
-            classworldsConf = copyClassWorldsFile(build, resource);
+            classworldsConf = copyFile("classworlds-freestyle.conf", "classworlds", ".conf");
         }
 
         if (classworldsConf != null) {
-            addCustomClassworlds(env, classworldsConf.getRemote());
+            env.put(CLASSWORLDS_CONF_KEY, classworldsConf.getRemote());
+        }
+
+        if (!env.containsKey(MavenInstallationValidator.MAVEN_EXEC_WIN)) {
+            FilePath mavenExecBat = copyFile("mvn.bat", "mvn", ".bat");
+            FilePath mavenExecSh = copyFile("mvn", "mvn", "");
+            if (mavenExecBat != null && mavenExecSh != null) {
+                env.put(MavenInstallationValidator.MAVEN_EXEC_NIX, mavenExecSh.getRemote());
+                env.put(MavenInstallationValidator.MAVEN_EXEC_WIN, mavenExecBat.getRemote());
+            }
         }
 
         if (!initialized) {
             try {
-                //TODO currently Maven should be patched with our extractor manually.
-             //   mavenConfig.setMavenOpts(appendNewMavenOpts());
+                mavenConfig.setMavenOpts(appendNewMavenOpts());
 
                 PublisherContext publisherContext = null;
                 if (wrapper != null) {
                     publisherContext = createPublisherContext(wrapper);
                 }
 
+                ResolverContext resolverContext = null;
+                if (wrapper != null) {
+                    Credentials resolverCredentials = CredentialResolver.getPreferredResolver(
+                            wrapper, wrapper.getArtifactoryServer());
+                    resolverContext = new ResolverContext(wrapper.getArtifactoryServer(), wrapper.getDetails(),
+                            resolverCredentials);
+                }
+
                 ArtifactoryClientConfiguration configuration = ExtractorUtils.addBuilderInfoArguments(
-                        env, build, buildListener, publisherContext);
+                        env, build, buildListener, publisherContext, resolverContext);
                 propertiesFilePath = configuration.getPropertiesFile();
             } catch (Exception e) {
                 throw new RuntimeException(e);
@@ -141,6 +155,20 @@ public class MavenExtractorEnvironment extends Environment {
         }
 
         env.put(BuildInfoConfigProperties.PROP_PROPS_FILE, propertiesFilePath);
+    }
+
+    private FilePath copyFile(String sourceFile, String targetFilename, String targetExt) {
+        URL resource = getClass().getClassLoader().getResource("org/jfrog/hudson/plugins/artifactory/maven3extractor/" + sourceFile);
+        if (resource == null) {
+            throw new IllegalStateException(sourceFile + " file not found");
+        }
+        try {
+            FilePath remoteClassworlds = build.getWorkspace().createTextTempFile(targetFilename, targetExt, "", false);
+            remoteClassworlds.copyFrom(resource);
+            return remoteClassworlds;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private boolean isMavenVersionValid() {
@@ -209,41 +237,16 @@ public class MavenExtractorEnvironment extends Environment {
         }
     }
 
-    /**
-     * Copies a classworlds file to a temporary location either on the local filesystem or on a slave depending on the
-     * node type.
-     *
-     * @return The path of the classworlds.conf file
-     */
-    private FilePath copyClassWorldsFile(AbstractBuild<?, ?> build, URL resource) {
-        try {
-            FilePath remoteClassworlds =
-                    build.getWorkspace().createTextTempFile("classworlds", ".conf", "", false);
-            remoteClassworlds.copyFrom(resource);
-            return remoteClassworlds;
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    /**
-     * Add a custom {@code classworlds.conf} file that will be read by the Maven build. Adds an environment variable
-     * {@code classwordls.conf} with the location of the classworlds file for Maven.
-     *
-     * @return The path of the classworlds.conf file
-     */
-    public static void addCustomClassworlds(Map<String, String> env, String classworldsConfPath) {
-        env.put(CLASSWORLDS_CONF_KEY, classworldsConfPath);
-    }
-
     private PublisherContext createPublisherContext(Maven3ExtractorWrapper publisher) {
         ServerDetails server = publisher.getDetails();
         return new PublisherContext.Builder().artifactoryServer(publisher.getArtifactoryServer())
-                .serverDetails(server).deployerOverrider(publisher).runChecks(publisher.isRunChecks())
+                .serverDetails(server).deployerOverrider(publisher).resolverOverrider(publisher)
+                .runChecks(publisher.isRunChecks())
                 .includePublishArtifacts(publisher.isIncludePublishArtifacts())
                 .violationRecipients(publisher.getViolationRecipients()).scopes(publisher.getScopes())
                 .licenseAutoDiscovery(publisher.isLicenseAutoDiscovery())
                 .discardOldBuilds(publisher.isDiscardOldBuilds()).deployArtifacts(publisher.isDeployArtifacts())
+                .resolveArtifacts(publisher.isResolveArtifacts())
                 .includesExcludes(publisher.getArtifactDeploymentPatterns())
                 .skipBuildInfoDeploy(!publisher.isDeployBuildInfo())
                 .includeEnvVars(publisher.isIncludeEnvVars()).envVarsPatterns(publisher.getEnvVarsPatterns())

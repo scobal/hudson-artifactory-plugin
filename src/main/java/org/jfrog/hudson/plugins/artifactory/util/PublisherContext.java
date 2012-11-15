@@ -18,6 +18,7 @@ package org.jfrog.hudson.plugins.artifactory.util;
 
 import org.apache.commons.lang.StringUtils;
 import org.jfrog.hudson.plugins.artifactory.DeployerOverrider;
+import org.jfrog.hudson.plugins.artifactory.ResolverOverrider;
 import org.jfrog.hudson.plugins.artifactory.config.ArtifactoryServer;
 import org.jfrog.hudson.plugins.artifactory.maven3extractor.config.ServerDetails;
 
@@ -31,6 +32,7 @@ public class PublisherContext {
     private ArtifactoryServer artifactoryServer;
     private ServerDetails serverDetails;
     private DeployerOverrider deployerOverrider;
+    private ResolverOverrider resolverOverrider;
     private boolean runChecks;
     private boolean includePublishArtifacts;
     private String violationRecipients;
@@ -39,6 +41,7 @@ public class PublisherContext {
     private boolean discardOldBuilds;
     private boolean discardBuildArtifacts;
     private boolean deployArtifacts;
+    private boolean resolveArtifacts;
     private IncludesExcludes includesExcludes;
     private boolean skipBuildInfoDeploy;
     private boolean includeEnvVars;
@@ -101,6 +104,10 @@ public class PublisherContext {
         return deployerOverrider;
     }
 
+    public ResolverOverrider getResolverOverrider() {
+        return resolverOverrider;
+    }
+
     public String getScopes() {
         return scopes;
     }
@@ -127,6 +134,10 @@ public class PublisherContext {
 
     public boolean isDeployArtifacts() {
         return deployArtifacts;
+    }
+
+    public boolean isResolveArtifacts() {
+        return resolveArtifacts;
     }
 
     public final String getArtifactoryName() {
@@ -193,6 +204,11 @@ public class PublisherContext {
             return this;
         }
 
+        public Builder resolverOverrider(ResolverOverrider resolverOverrider) {
+            publisher.resolverOverrider = resolverOverrider;
+            return this;
+        }
+
         public Builder runChecks(boolean runChecks) {
             publisher.runChecks = runChecks;
             return this;
@@ -225,6 +241,11 @@ public class PublisherContext {
 
         public Builder deployArtifacts(boolean deployArtifacts) {
             publisher.deployArtifacts = deployArtifacts;
+            return this;
+        }
+
+        public Builder resolveArtifacts(boolean resolveArtifacts) {
+            publisher.resolveArtifacts = resolveArtifacts;
             return this;
         }
 

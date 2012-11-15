@@ -92,13 +92,25 @@ public class ExtractorUtils {
      * @param publisherContext A context for publisher settings
      */
     public static ArtifactoryClientConfiguration addBuilderInfoArguments(Map<String, String> env, AbstractBuild build,
-                                                                         BuildListener listener, PublisherContext publisherContext)
+                                                                         BuildListener listener, PublisherContext publisherContext,
+                                                                         ResolverContext resolverContext)
             throws IOException, InterruptedException {
         ArtifactoryClientConfiguration configuration = new ArtifactoryClientConfiguration(new NullLog());
         addBuildRootIfNeeded(build, configuration);
 
         if (publisherContext != null) {
-            setPublisherInfo(env, build, publisherContext, configuration);
+            setPublisherInfo(env, build, resolverContext, publisherContext, configuration);
+        }
+
+
+        if (resolverContext != null) {
+            setResolverInfo(configuration, resolverContext);
+        }
+
+        if ((Hudson.getInstance().getPlugin("jira") != null) && (publisherContext != null) &&
+                publisherContext.isEnableIssueTrackerIntegration()) {
+            new IssuesTrackerHelper(build, listener, publisherContext.isAggregateBuildIssues(),
+                    publisherContext.getAggregationBuildStatus()).setIssueTrackerInfo(configuration);
         }
 
         IncludesExcludes envVarsPatterns = publisherContext.getEnvVarsPatterns();
@@ -121,8 +133,8 @@ public class ExtractorUtils {
     /**
      * Set all the parameters relevant for publishing artifacts and build info
      */
-    private static void setPublisherInfo(Map<String, String> env, AbstractBuild build,
-                                         PublisherContext context, ArtifactoryClientConfiguration configuration) {
+    private static void setPublisherInfo(Map<String, String> env, AbstractBuild build, ResolverContext resolverContext,
+                                         PublisherContext publisherContext, ArtifactoryClientConfiguration configuration) {
         configuration.setActivateRecorder(Boolean.TRUE);
 
         String buildName = sanitizeBuildName(build.getProject().getFullName());
@@ -143,13 +155,13 @@ public class ExtractorUtils {
             configuration.publisher.addMatrixParam(BuildInfoFields.VCS_REVISION, vcsRevision);
         }
 
-        if (StringUtils.isNotBlank(context.getArtifactsPattern())) {
-            configuration.publisher.setIvyArtifactPattern(context.getArtifactsPattern());
+        if (StringUtils.isNotBlank(publisherContext.getArtifactsPattern())) {
+            configuration.publisher.setIvyArtifactPattern(publisherContext.getArtifactsPattern());
         }
-        if (StringUtils.isNotBlank(context.getIvyPattern())) {
-            configuration.publisher.setIvyPattern(context.getIvyPattern());
+        if (StringUtils.isNotBlank(publisherContext.getIvyPattern())) {
+            configuration.publisher.setIvyPattern(publisherContext.getIvyPattern());
         }
-        configuration.publisher.setM2Compatible(context.isMaven2Compatible());
+        configuration.publisher.setM2Compatible(publisherContext.isMaven2Compatible());
         String buildUrl = ActionableHelper.getBuildUrl(build);
         if (StringUtils.isNotBlank(buildUrl)) {
             configuration.info.setBuildUrl(buildUrl);
@@ -172,26 +184,38 @@ public class ExtractorUtils {
         configuration.info.setPrincipal(userName);
         configuration.info.setAgentName("Hudson");
         configuration.info.setAgentVersion(build.getHudsonVersion());
-        ArtifactoryServer artifactoryServer = context.getArtifactoryServer();
+        ArtifactoryServer publishingServer = publisherContext.getArtifactoryServer();
+        ArtifactoryServer resolvingServer = resolverContext.getServer();
         Credentials preferredDeployer =
-                CredentialResolver.getPreferredDeployer(context.getDeployerOverrider(), artifactoryServer);
+                CredentialResolver.getPreferredDeployer(publisherContext.getDeployerOverrider(), publishingServer);
         if (StringUtils.isNotBlank(preferredDeployer.getUsername())) {
             configuration.publisher.setUsername(preferredDeployer.getUsername());
             configuration.publisher.setPassword(preferredDeployer.getPassword());
+
+            configuration.publisher.setContextUrl(publishingServer.getUrl());
+            configuration.publisher.setRepoKey(publisherContext.getServerDetails().repositoryKey);
+            configuration.publisher.setSnapshotRepoKey(publisherContext.getServerDetails().snapshotsRepositoryKey);
         }
-        configuration.setTimeout(artifactoryServer.getTimeout());
-        configuration.publisher.setContextUrl(artifactoryServer.getUrl());
-        configuration.publisher.setRepoKey(context.getServerDetails().repositoryKey);
-        configuration.publisher.setSnapshotRepoKey(context.getServerDetails().snapshotsRepositoryKey);
-        if (context.isRunChecks()) {
-            if (StringUtils.isNotBlank(context.getViolationRecipients())) {
-                configuration.info.licenseControl.setViolationRecipients(context.getViolationRecipients());
+
+        Credentials preferredResolver = resolverContext.getCredentials();
+        if (StringUtils.isNotBlank(preferredResolver.getUsername())) {
+            configuration.resolver.setUsername(preferredResolver.getUsername());
+            configuration.resolver.setPassword(preferredResolver.getPassword());
+        }
+        configuration.setTimeout(publishingServer.getTimeout());
+
+        configuration.resolver.setContextUrl(resolvingServer.getUrl());
+        configuration.resolver.setRepoKey(resolverContext.getServerDetails().repositoryKey);
+
+        if (publisherContext.isRunChecks()) {
+            if (StringUtils.isNotBlank(publisherContext.getViolationRecipients())) {
+                configuration.info.licenseControl.setViolationRecipients(publisherContext.getViolationRecipients());
             }
-            if (StringUtils.isNotBlank(context.getScopes())) {
-                configuration.info.licenseControl.setScopes(context.getScopes());
+            if (StringUtils.isNotBlank(publisherContext.getScopes())) {
+                configuration.info.licenseControl.setScopes(publisherContext.getScopes());
             }
         }
-        if (context.isDiscardOldBuilds()) {
+        if (publisherContext.isDiscardOldBuilds()) {
             LogRotator rotator = build.getProject().getLogRotator();
             if (rotator != null) {
                 if (rotator.getNumToKeep() > -1) {
@@ -200,15 +224,15 @@ public class ExtractorUtils {
                 if (rotator.getDaysToKeep() > -1) {
                     configuration.info.setBuildRetentionMinimumDate(String.valueOf(rotator.getDaysToKeep()));
                 }
-                configuration.info.setDeleteBuildArtifacts(context.isDiscardBuildArtifacts());
+                configuration.info.setDeleteBuildArtifacts(publisherContext.isDiscardBuildArtifacts());
             }
             configuration.info.setBuildNumbersNotToDelete(getBuildNumbersNotToBeDeletedAsString(build));
         }
-        configuration.publisher.setPublishArtifacts(context.isDeployArtifacts());
-        configuration.publisher.setEvenUnstable(context.isEvenIfUnstable());
-        configuration.publisher.setIvy(context.isDeployIvy());
-        configuration.publisher.setMaven(context.isDeployMaven());
-        IncludesExcludes deploymentPatterns = context.getIncludesExcludes();
+        configuration.publisher.setPublishArtifacts(publisherContext.isDeployArtifacts());
+        configuration.publisher.setEvenUnstable(publisherContext.isEvenIfUnstable());
+        configuration.publisher.setIvy(publisherContext.isDeployIvy());
+        configuration.publisher.setMaven(publisherContext.isDeployMaven());
+        IncludesExcludes deploymentPatterns = publisherContext.getIncludesExcludes();
         if (deploymentPatterns != null) {
             String includePatterns = deploymentPatterns.getIncludePatterns();
             if (StringUtils.isNotBlank(includePatterns)) {
@@ -219,14 +243,14 @@ public class ExtractorUtils {
                 configuration.publisher.setExcludePatterns(excludePatterns);
             }
         }
-        configuration.publisher.setPublishBuildInfo(!context.isSkipBuildInfoDeploy());
-        configuration.setIncludeEnvVars(context.isIncludeEnvVars());
-        IncludesExcludes envVarsPatterns = context.getEnvVarsPatterns();
+        configuration.publisher.setPublishBuildInfo(!publisherContext.isSkipBuildInfoDeploy());
+        configuration.setIncludeEnvVars(publisherContext.isIncludeEnvVars());
+        IncludesExcludes envVarsPatterns = publisherContext.getEnvVarsPatterns();
         if (envVarsPatterns != null) {
             configuration.setEnvVarsIncludePatterns(envVarsPatterns.getIncludePatterns());
             configuration.setEnvVarsExcludePatterns(envVarsPatterns.getExcludePatterns());
         }
-        addMatrixParams(context, configuration.publisher, env);
+        addMatrixParams(publisherContext, configuration.publisher, env);
     }
 
     /**
