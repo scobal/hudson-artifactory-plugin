@@ -134,6 +134,7 @@
             <groupId>org.jvnet.hudson.plugins</groupId>
             <artifactId>jira</artifactId>
             <version>1.26</version>
+            <optional>true</optional>
         </dependency>
 
     </dependencies>
