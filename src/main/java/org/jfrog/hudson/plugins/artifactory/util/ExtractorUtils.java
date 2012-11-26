@@ -118,9 +118,9 @@ public class ExtractorUtils {
                     publisherContext.getAggregationBuildStatus()).setIssueTrackerInfo(configuration);
         }
 
-        IncludesExcludes envVarsPatterns = publisherContext.getEnvVarsPatterns();
-        if (envVarsPatterns == null) {
-            envVarsPatterns = new IncludesExcludes("", "");
+        IncludesExcludes envVarsPatterns = new IncludesExcludes("", "");
+        if (publisherContext != null && publisherContext.getEnvVarsPatterns() != null) {
+            envVarsPatterns = publisherContext.getEnvVarsPatterns();
         }
         addEnvVars(env, build, configuration, envVarsPatterns);
         persistConfiguration(build, configuration, env);
