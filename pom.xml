@@ -79,7 +79,7 @@
             <version>3.0.1a-SNAPSHOT</version>
         </dependency>
 
-        <!-- usage of jenkins customized xstream is a must for the integration tests -->
+        <!-- usage of hudson customized xstream is a must for the integration tests -->
         <dependency>
             <groupId>org.jvnet.hudson</groupId>
             <artifactId>xstream</artifactId>
