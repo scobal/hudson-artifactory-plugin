@@ -21,6 +21,7 @@ import hudson.Launcher;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
 import hudson.model.BuildListener;
+import hudson.model.FreeStyleProject;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.Builder;
 import hudson.util.FormValidation;
@@ -105,8 +106,8 @@ public class ArtifactoryBuilder extends Builder {
          * credentials when testing the connection to the server
          */
         public FormValidation doCheckUrl(@QueryParameter final String value,
-                                         @QueryParameter final String username,
-                                         @QueryParameter final String password) throws ServletException {
+                @QueryParameter final String username,
+                @QueryParameter final String password) throws ServletException {
             if (StringUtils.isBlank(value)) {
                 return FormValidation.error("Please set a valid Artifactory URL");
             }
@@ -132,8 +133,7 @@ public class ArtifactoryBuilder extends Builder {
         @Override
         public boolean isApplicable(Class<? extends AbstractProject> aClass) {
             // indicates that this builder can be used with all kinds of project types
-            //TODO debug to figure out the freestyle class with maven plugin
-            return true;
+            return aClass == FreeStyleProject.class;
         }
 
         /**

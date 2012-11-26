@@ -190,7 +190,7 @@ public class Maven3ExtractorWrapper extends BuildWrapper
     public ArtifactoryServer getArtifactoryServer() {
         List<ArtifactoryServer> servers = getDescriptor().getArtifactoryServers();
         for (ArtifactoryServer server : servers) {
-            if (server.getName().equals(artifactoryName())) {
+            if (server.getName().equals(getArtifactoryName())) {
                 return server;
             }
         }
@@ -238,7 +238,7 @@ public class Maven3ExtractorWrapper extends BuildWrapper
         return disableLicenseAutoDiscovery;
     }
 
-    public String artifactoryName() {
+    public String getArtifactoryName() {
         return details != null ? details.artifactoryName : null;
     }
 
@@ -293,7 +293,7 @@ public class Maven3ExtractorWrapper extends BuildWrapper
     public Environment setUp(final AbstractBuild build, Launcher launcher, final BuildListener listener)
             throws IOException, InterruptedException {
 
-        final String artifactoryServerName = artifactoryName();
+        final String artifactoryServerName = getArtifactoryName();
         if (StringUtils.isBlank(artifactoryServerName)) {
             return super.setUp(build, launcher, listener);
         }
