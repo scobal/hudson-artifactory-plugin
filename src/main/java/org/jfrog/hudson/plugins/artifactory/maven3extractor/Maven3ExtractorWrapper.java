@@ -369,6 +369,10 @@ public class Maven3ExtractorWrapper extends BuildWrapper
                     Hudson.getInstance().getDescriptor(ArtifactoryBuilder.class);
             return descriptor.getArtifactoryServers();
         }
+
+        public boolean isJiraPluginEnabled() {
+            return (Hudson.getInstance().getPlugin("jira") != null);
+        }
     }
 
     /**

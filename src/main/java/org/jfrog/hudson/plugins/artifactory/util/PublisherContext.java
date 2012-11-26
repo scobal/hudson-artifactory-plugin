@@ -181,7 +181,8 @@ public class PublisherContext {
 
         public PublisherContext build() {
             if (publisher.artifactoryServer == null) {
-                throw new IllegalArgumentException("No matching Artifactory server was found in General Configuration. Please update your job configuration.");
+                throw new IllegalArgumentException(
+                        "No matching Artifactory server was found in General Configuration. Please update your job configuration.");
             }
             if (publisher.serverDetails == null) {
                 throw new IllegalArgumentException("serverDetails cannot be null");
@@ -306,6 +307,16 @@ public class PublisherContext {
 
         public Builder maven2Compatible(boolean maven2Compatible) {
             publisher.maven2Compatible = maven2Compatible;
+            return this;
+        }
+
+        public Builder enableIssueTrackerIntegration(boolean enableIssueTrackerIntegration) {
+            publisher.enableIssueTrackerIntegration = enableIssueTrackerIntegration;
+            return this;
+        }
+
+        public Builder aggregateBuildIssues(boolean aggregateBuildIssues) {
+            publisher.aggregateBuildIssues = aggregateBuildIssues;
             return this;
         }
 
