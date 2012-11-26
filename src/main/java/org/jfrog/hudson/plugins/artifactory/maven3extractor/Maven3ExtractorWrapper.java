@@ -18,7 +18,13 @@ package org.jfrog.hudson.plugins.artifactory.maven3extractor;
 
 import hudson.Extension;
 import hudson.Launcher;
-import hudson.model.*;
+import hudson.model.AbstractBuild;
+import hudson.model.AbstractProject;
+import hudson.model.Action;
+import hudson.model.BuildListener;
+import hudson.model.FreeStyleProject;
+import hudson.model.Hudson;
+import hudson.model.Result;
 import hudson.tasks.BuildWrapper;
 import hudson.tasks.BuildWrapperDescriptor;
 import hudson.util.FormValidation;
@@ -50,7 +56,8 @@ import java.util.Map;
  *
  * @author Noam Y. Tenne
  */
-public class Maven3ExtractorWrapper extends BuildWrapper implements DeployerOverrider, ResolverOverrider, BuildInfoAwareConfigurator {
+public class Maven3ExtractorWrapper extends BuildWrapper
+        implements DeployerOverrider, ResolverOverrider, BuildInfoAwareConfigurator {
 
     /**
      * Repository URL and repository to deploy artifacts to
@@ -93,13 +100,16 @@ public class Maven3ExtractorWrapper extends BuildWrapper implements DeployerOver
     private final boolean resolveArtifacts;
 
     @DataBoundConstructor
-    public Maven3ExtractorWrapper(ServerDetails details, ServerDetails resolveDetails, Credentials overridingDeployerCredentials,
-                                  Credentials overridingResolverCredentials, IncludesExcludes artifactDeploymentPatterns, boolean deployArtifacts, boolean deployBuildInfo,
-                                  boolean includeEnvVars, IncludesExcludes envVarsPatterns,
-                                  boolean runChecks, String violationRecipients, boolean includePublishArtifacts,
-                                  String scopes, boolean disableLicenseAutoDiscovery, boolean discardOldBuilds,
-                                  boolean discardBuildArtifacts, String matrixParams,
-                                  boolean enableIssueTrackerIntegration, boolean aggregateBuildIssues, String aggregationBuildStatus, boolean resolveArtifacts) {
+    public Maven3ExtractorWrapper(ServerDetails details, ServerDetails resolveDetails,
+            Credentials overridingDeployerCredentials,
+            Credentials overridingResolverCredentials, IncludesExcludes artifactDeploymentPatterns,
+            boolean deployArtifacts, boolean deployBuildInfo,
+            boolean includeEnvVars, IncludesExcludes envVarsPatterns,
+            boolean runChecks, String violationRecipients, boolean includePublishArtifacts,
+            String scopes, boolean disableLicenseAutoDiscovery, boolean discardOldBuilds,
+            boolean discardBuildArtifacts, String matrixParams,
+            boolean enableIssueTrackerIntegration, boolean aggregateBuildIssues, String aggregationBuildStatus,
+            boolean resolveArtifacts) {
         this.details = details;
         this.resolveDetails = resolveDetails;
         this.overridingDeployerCredentials = overridingDeployerCredentials;
@@ -185,6 +195,20 @@ public class Maven3ExtractorWrapper extends BuildWrapper implements DeployerOver
             }
         }
         return null;
+    }
+
+    public ArtifactoryServer getResolverArtifactoryServer() {
+        List<ArtifactoryServer> servers = getDescriptor().getArtifactoryServers();
+        for (ArtifactoryServer server : servers) {
+            if (server.getName().equals(resolverArtifactoryName())) {
+                return server;
+            }
+        }
+        return null;
+    }
+
+    public String resolverArtifactoryName() {
+        return resolveDetails != null ? resolveDetails.artifactoryName : null;
     }
 
     @SuppressWarnings({"UnusedDeclaration"})
@@ -286,7 +310,8 @@ public class Maven3ExtractorWrapper extends BuildWrapper implements DeployerOver
 
         return new Environment() {
             @Override
-            public boolean tearDown(AbstractBuild build, BuildListener listener) throws IOException, InterruptedException {
+            public boolean tearDown(AbstractBuild build, BuildListener listener)
+                    throws IOException, InterruptedException {
                 return environment.tearDown(build, listener);
             }
 

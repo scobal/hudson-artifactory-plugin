@@ -83,7 +83,8 @@
                 <f:optionalBlock name="overridingDeployerCredentials" checked="${overridingDeployerCredentials != null}"
                                  title="Override default deployer credentials"
                                  help="/plugin/artifactory/help/common/help-overridingDeployerCredentials.html">
-                    <input type="hidden" name="stapler-class" value="org.jfrog.hudson.util.Credentials"/>
+                    <input type="hidden" name="stapler-class"
+                           value="org.jfrog.hudson.plugins.artifactory.config.Credentials"/>
                     <f:entry title="User Name" help="/plugin/artifactory/help/common/help-deployerUserName.html"
                              field="username">
                         <f:textbox value="${overridingDeployerCredentials.username}"/>
@@ -138,7 +139,8 @@
                 <f:optionalBlock name="overridingResolverCredentials" checked="${overridingResolverCredentials != null}"
                                  title="Override default resolver credentials"
                                  help="/plugin/artifactory/help/common/help-overridingResolverCredentials.html">
-                    <input type="hidden" name="stapler-class" value="org.jfrog.hudson.util.Credentials"/>
+                    <input type="hidden" name="stapler-class"
+                           value="org.jfrog.hudson.plugins.artifactory.config.Credentials"/>
                     <f:entry title="User Name" help="/plugin/artifactory/help/common/help-resolverUserName.html"
                              field="username">
                         <f:textbox value="${overridingResolverCredentials.username}"/>

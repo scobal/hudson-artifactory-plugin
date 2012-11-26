@@ -32,12 +32,15 @@ import org.hudsonci.maven.plugin.builder.internal.MavenInstallationValidator;
 import org.jfrog.build.api.BuildInfoConfigProperties;
 import org.jfrog.build.client.ArtifactoryClientConfiguration;
 import org.jfrog.build.extractor.maven.BuildInfoRecorder;
-import org.jfrog.hudson.plugins.artifactory.ResolverOverrider;
 import org.jfrog.hudson.plugins.artifactory.action.ActionableHelper;
 import org.jfrog.hudson.plugins.artifactory.action.BuildInfoResultAction;
 import org.jfrog.hudson.plugins.artifactory.config.Credentials;
 import org.jfrog.hudson.plugins.artifactory.maven3extractor.config.ServerDetails;
-import org.jfrog.hudson.plugins.artifactory.util.*;
+import org.jfrog.hudson.plugins.artifactory.util.CredentialResolver;
+import org.jfrog.hudson.plugins.artifactory.util.ExtractorUtils;
+import org.jfrog.hudson.plugins.artifactory.util.PluginDependencyHelper;
+import org.jfrog.hudson.plugins.artifactory.util.PublisherContext;
+import org.jfrog.hudson.plugins.artifactory.util.ResolverContext;
 
 import java.io.File;
 import java.io.IOException;
@@ -140,9 +143,9 @@ public class MavenExtractorEnvironment extends Environment {
                 ResolverContext resolverContext = null;
                 if (wrapper != null) {
                     Credentials resolverCredentials = CredentialResolver.getPreferredResolver(
-                            wrapper, wrapper.getArtifactoryServer());
-                    resolverContext = new ResolverContext(wrapper.getArtifactoryServer(), wrapper.getDetails(),
-                            resolverCredentials);
+                            wrapper, wrapper.getResolverArtifactoryServer());
+                    resolverContext = new ResolverContext(wrapper.getResolverArtifactoryServer(),
+                            wrapper.getResolveDetails(), resolverCredentials);
                 }
 
                 ArtifactoryClientConfiguration configuration = ExtractorUtils.addBuilderInfoArguments(
@@ -158,7 +161,8 @@ public class MavenExtractorEnvironment extends Environment {
     }
 
     private FilePath copyFile(String sourceFile, String targetFilename, String targetExt) {
-        URL resource = getClass().getClassLoader().getResource("org/jfrog/hudson/plugins/artifactory/maven3extractor/" + sourceFile);
+        URL resource = getClass().getClassLoader().getResource(
+                "org/jfrog/hudson/plugins/artifactory/maven3extractor/" + sourceFile);
         if (resource == null) {
             throw new IllegalStateException(sourceFile + " file not found");
         }
@@ -218,7 +222,8 @@ public class MavenExtractorEnvironment extends Environment {
             FilePath actualDependencyDirectory =
                     PluginDependencyHelper.getActualDependencyDirectory(build, maven3ExtractorJar);
             mavenOpts.append(" ").append(MAVEN_PLUGIN_OPTS).append("=")
-                    .append(quote(actualDependencyDirectory.getRemote())).append(" -D").append(CLASSWORLDS_CONF_KEY).append("=").append(classworldsConf.getRemote());
+                    .append(quote(actualDependencyDirectory.getRemote())).append(" -D").append(
+                    CLASSWORLDS_CONF_KEY).append("=").append(classworldsConf.getRemote());
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
