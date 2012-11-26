@@ -82,15 +82,15 @@
                 <j:set var="overridingDeployerCredentials" value="${instance.overridingDeployerCredentials}"/>
                 <f:optionalBlock name="overridingDeployerCredentials" checked="${overridingDeployerCredentials != null}"
                                  title="Override default deployer credentials"
-                                 help="/plugin/artifactory/help/common/help-overridingDeployerCredentials.html">
+                                 help="/plugin/artifactory/help/FreeStyle/help-overridingDeployerCredentials.html">
                     <input type="hidden" name="stapler-class"
                            value="org.jfrog.hudson.plugins.artifactory.config.Credentials"/>
-                    <f:entry title="User Name" help="/plugin/artifactory/help/common/help-deployerUserName.html"
+                    <f:entry title="User Name" help="/plugin/artifactory/help/FreeStyle/help-deployerUserName.html"
                              field="username">
                         <f:textbox value="${overridingDeployerCredentials.username}"/>
                     </f:entry>
                     <f:entry title="Password" field="password"
-                             help="/plugin/artifactory/help/common/help-deployerPassword.html">
+                             help="/plugin/artifactory/help/FreeStyle/help-deployerPassword.html">
                         <f:password value="${overridingDeployerCredentials.password}"/>
                     </f:entry>
                 </f:optionalBlock>
@@ -101,7 +101,7 @@
         <f:block>
             <table style="width:100%">
                 <f:optionalBlock field="resolveArtifacts"
-                                 help="/plugin/artifactory/help/FreeStyle/help-deployArtifacts.html"
+                                 help="/plugin/artifactory/help/FreeStyle/help-resolveArtifacts.html"
                                  title="Resolve artifacts from Artifactory"
                                  inline="true"
                                  checked="${h.defaultToFalse(instance.resolveArtifacts)}">
@@ -134,15 +134,15 @@
                     <f:optionalBlock name="overridingResolverCredentials"
                                      checked="${overridingResolverCredentials != null}"
                                      title="Override default resolver credentials"
-                                     help="/plugin/artifactory/help/common/help-overridingResolverCredentials.html">
+                                     help="/plugin/artifactory/help/FreeStyle/help-overridingResolverCredentials.html">
                         <input type="hidden" name="stapler-class"
                                value="org.jfrog.hudson.plugins.artifactory.config.Credentials"/>
-                        <f:entry title="User Name" help="/plugin/artifactory/help/common/help-resolverUserName.html"
+                        <f:entry title="User Name" help="/plugin/artifactory/help/FreeStyle/help-resolverUserName.html"
                                  field="username">
                             <f:textbox value="${overridingResolverCredentials.username}"/>
                         </f:entry>
                         <f:entry title="Password" field="password"
-                                 help="/plugin/artifactory/help/common/help-resolverPassword.html">
+                                 help="/plugin/artifactory/help/FreeStyle/help-resolverPassword.html">
                             <f:password value="${overridingResolverCredentials.password}"/>
                         </f:entry>
                     </f:optionalBlock>
