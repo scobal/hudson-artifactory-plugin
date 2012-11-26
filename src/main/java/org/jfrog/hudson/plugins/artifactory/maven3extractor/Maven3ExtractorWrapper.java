@@ -200,15 +200,19 @@ public class Maven3ExtractorWrapper extends BuildWrapper
     public ArtifactoryServer getResolverArtifactoryServer() {
         List<ArtifactoryServer> servers = getDescriptor().getArtifactoryServers();
         for (ArtifactoryServer server : servers) {
-            if (server.getName().equals(resolverArtifactoryName())) {
+            if (server.getName().equals(getResolverArtifactoryName())) {
                 return server;
             }
         }
         return null;
     }
 
-    public String resolverArtifactoryName() {
+    public String getResolverArtifactoryName() {
         return resolveDetails != null ? resolveDetails.artifactoryName : null;
+    }
+
+    public String getDownloadRepositoryKey() {
+        return resolveDetails != null ? resolveDetails.downloadRepositoryKey : null;
     }
 
     @SuppressWarnings({"UnusedDeclaration"})
