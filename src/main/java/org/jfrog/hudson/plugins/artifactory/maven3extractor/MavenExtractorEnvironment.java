@@ -141,7 +141,7 @@ public class MavenExtractorEnvironment extends Environment {
                 }
 
                 ResolverContext resolverContext = null;
-                if (wrapper != null) {
+                if (wrapper != null && wrapper.isResolveArtifacts()) {
                     Credentials resolverCredentials = CredentialResolver.getPreferredResolver(
                             wrapper, wrapper.getResolverArtifactoryServer());
                     resolverContext = new ResolverContext(wrapper.getResolverArtifactoryServer(),
