@@ -135,6 +135,12 @@
             <artifactId>jira</artifactId>
             <version>1.26</version>
             <optional>true</optional>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.apache.maven</groupId>
+                    <artifactId>maven-core</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
     </dependencies>
