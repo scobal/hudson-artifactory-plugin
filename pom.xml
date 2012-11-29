@@ -76,7 +76,7 @@
         <dependency>
             <groupId>org.hudsonci.plugins</groupId>
             <artifactId>maven3-plugin</artifactId>
-            <version>3.0.1a-SNAPSHOT</version>
+            <version>3.0.1a</version>
         </dependency>
 
         <!-- usage of hudson customized xstream is a must for the integration tests -->
