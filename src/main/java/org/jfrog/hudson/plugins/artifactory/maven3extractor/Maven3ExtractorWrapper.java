@@ -38,7 +38,7 @@ import org.jfrog.hudson.plugins.artifactory.ResolverOverrider;
 import org.jfrog.hudson.plugins.artifactory.action.ActionableHelper;
 import org.jfrog.hudson.plugins.artifactory.config.ArtifactoryServer;
 import org.jfrog.hudson.plugins.artifactory.config.Credentials;
-import org.jfrog.hudson.plugins.artifactory.maven3extractor.config.ServerDetails;
+import org.jfrog.hudson.plugins.artifactory.config.ServerDetails;
 import org.jfrog.hudson.plugins.artifactory.util.FormValidations;
 import org.jfrog.hudson.plugins.artifactory.util.IncludesExcludes;
 import org.jfrog.hudson.plugins.artifactory.util.OverridingDeployerCredentialsConverter;

@@ -18,7 +18,7 @@ package org.jfrog.hudson.plugins.artifactory.util;
 
 import org.jfrog.hudson.plugins.artifactory.config.ArtifactoryServer;
 import org.jfrog.hudson.plugins.artifactory.config.Credentials;
-import org.jfrog.hudson.plugins.artifactory.maven3extractor.config.ServerDetails;
+import org.jfrog.hudson.plugins.artifactory.config.ServerDetails;
 
 /**
  * Context for resolution. Used by a shared code to set the resolver configuration.

@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-package org.jfrog.hudson.plugins.artifactory.maven3extractor.config;
+package org.jfrog.hudson.plugins.artifactory.config;
 
+import org.jfrog.hudson.plugins.artifactory.maven3extractor.config.PluginSettings;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 /**
@@ -45,8 +46,9 @@ public class ServerDetails {
     private PluginSettings stagingPlugin;
 
     @DataBoundConstructor
-    public ServerDetails(String artifactoryName, String artifactoryUrl, String repositoryKey, String snapshotsRepositoryKey,
-                         String downloadRepositoryKey) {
+    public ServerDetails(String artifactoryName, String artifactoryUrl, String repositoryKey,
+            String snapshotsRepositoryKey,
+            String downloadRepositoryKey) {
         this.artifactoryName = artifactoryName;
         this.artifactoryUrl = artifactoryUrl;
         this.repositoryKey = repositoryKey;

@@ -20,7 +20,7 @@ import org.apache.commons.lang.StringUtils;
 import org.jfrog.hudson.plugins.artifactory.DeployerOverrider;
 import org.jfrog.hudson.plugins.artifactory.ResolverOverrider;
 import org.jfrog.hudson.plugins.artifactory.config.ArtifactoryServer;
-import org.jfrog.hudson.plugins.artifactory.maven3extractor.config.ServerDetails;
+import org.jfrog.hudson.plugins.artifactory.config.ServerDetails;
 
 /**
  * Container class for build context fields

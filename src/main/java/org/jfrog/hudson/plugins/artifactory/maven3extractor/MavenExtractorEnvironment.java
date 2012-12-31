@@ -35,7 +35,7 @@ import org.jfrog.build.extractor.maven.BuildInfoRecorder;
 import org.jfrog.hudson.plugins.artifactory.action.ActionableHelper;
 import org.jfrog.hudson.plugins.artifactory.action.BuildInfoResultAction;
 import org.jfrog.hudson.plugins.artifactory.config.Credentials;
-import org.jfrog.hudson.plugins.artifactory.maven3extractor.config.ServerDetails;
+import org.jfrog.hudson.plugins.artifactory.config.ServerDetails;
 import org.jfrog.hudson.plugins.artifactory.util.CredentialResolver;
 import org.jfrog.hudson.plugins.artifactory.util.ExtractorUtils;
 import org.jfrog.hudson.plugins.artifactory.util.PluginDependencyHelper;

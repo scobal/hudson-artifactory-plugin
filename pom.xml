@@ -14,7 +14,9 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   ~
-  --><project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  -->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
     <modelVersion>4.0.0</modelVersion>
 
@@ -76,6 +78,12 @@
             <artifactId>maven3-plugin</artifactId>
             <version>3.0.1a</version>
         </dependency>
+        <dependency>
+            <groupId>org.jenkins-ci.plugins</groupId>
+            <artifactId>gradle</artifactId>
+            <version>1.16</version>
+            <optional>true</optional>
+        </dependency>
 
         <!-- usage of hudson customized xstream is a must for the integration tests -->
         <dependency>
@@ -121,6 +129,41 @@
             <groupId>org.jfrog.buildinfo</groupId>
             <artifactId>build-info-extractor-maven3</artifactId>
             <version>2.0.10</version>
+        </dependency>
+        <dependency>
+            <groupId>org.jfrog.buildinfo</groupId>
+            <artifactId>build-info-extractor-gradle</artifactId>
+            <version>2.0.17</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.apache.ant</groupId>
+                    <artifactId>ant</artifactId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>groovy-all</artifactId>
+                    <groupId>org.codehaus.groovy</groupId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.codehaus.groovy</groupId>
+                    <artifactId>groovy-all-minimal</artifactId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>gmaven-runtime-1.6</artifactId>
+                    <groupId>org.codehaus.groovy.maven.runtime</groupId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.gradle</groupId>
+                    <artifactId>gradle-core</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.gradle</groupId>
+                    <artifactId>gradle-plugins</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>com.tonicsystems.jarjar</groupId>
+                    <artifactId>jarjar-plugin</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>junit</groupId>
