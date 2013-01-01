@@ -28,7 +28,6 @@ import hudson.model.Result;
 import hudson.tasks.BuildWrapper;
 import hudson.tasks.BuildWrapperDescriptor;
 import hudson.util.FormValidation;
-import hudson.util.XStream2;
 import net.sf.json.JSONObject;
 import org.apache.commons.lang.StringUtils;
 import org.jfrog.hudson.plugins.artifactory.ArtifactoryBuilder;
@@ -41,7 +40,6 @@ import org.jfrog.hudson.plugins.artifactory.config.Credentials;
 import org.jfrog.hudson.plugins.artifactory.config.ServerDetails;
 import org.jfrog.hudson.plugins.artifactory.util.FormValidations;
 import org.jfrog.hudson.plugins.artifactory.util.IncludesExcludes;
-import org.jfrog.hudson.plugins.artifactory.util.OverridingDeployerCredentialsConverter;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.StaplerRequest;
@@ -374,32 +372,4 @@ public class Maven3ExtractorWrapper extends BuildWrapper
             return (Hudson.getInstance().getPlugin("jira") != null);
         }
     }
-
-    /**
-     * Convert any remaining local credential variables to a credentials object
-     */
-    public static final class ConverterImpl extends OverridingDeployerCredentialsConverter {
-        public ConverterImpl(XStream2 xstream) {
-            super(xstream);
-        }
-    }
-
-    /**
-     * @deprecated: Use org.jfrog.hudson.DeployerOverrider#getOverridingDeployerCredentials()
-     */
-    @Deprecated
-    private transient String username;
-
-    /**
-     * @deprecated: Use org.jfrog.hudson.DeployerOverrider#getOverridingDeployerCredentials()
-     */
-    @Deprecated
-    private transient String scrambledPassword;
-
-    /**
-     * @deprecated: Use org.jfrog.hudson.maven3.Maven3ExtractorWrapper#deployBuildInfo
-     */
-    @Deprecated
-    private transient boolean skipBuildInfoDeploy;
-
 }
