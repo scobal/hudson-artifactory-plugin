@@ -91,7 +91,6 @@ public class ArtifactoryGradleConfigurator extends BuildWrapper implements Deplo
     private final boolean notM2Compatible;
     private final IncludesExcludes artifactDeploymentPatterns;
     private final boolean discardOldBuilds;
-    private final boolean passIdentifiedDownstream;
     private final boolean discardBuildArtifacts;
     private final String matrixParams;
     private final boolean skipInjectInitScript;
@@ -103,8 +102,7 @@ public class ArtifactoryGradleConfigurator extends BuildWrapper implements Deplo
             boolean deployBuildInfo, boolean runChecks, String violationRecipients,
             boolean includePublishArtifacts, String scopes, boolean disableLicenseAutoDiscovery, String ivyPattern,
             String artifactPattern, boolean notM2Compatible, IncludesExcludes artifactDeploymentPatterns,
-            boolean discardOldBuilds, boolean passIdentifiedDownstream,
-            boolean discardBuildArtifacts, String matrixParams, boolean skipInjectInitScript,
+            boolean discardOldBuilds, boolean discardBuildArtifacts, String matrixParams, boolean skipInjectInitScript,
             boolean enableIssueTrackerIntegration, boolean aggregateBuildIssues, String aggregationBuildStatus) {
         this.details = details;
         this.overridingDeployerCredentials = overridingDeployerCredentials;
@@ -128,7 +126,6 @@ public class ArtifactoryGradleConfigurator extends BuildWrapper implements Deplo
         this.notM2Compatible = notM2Compatible;
         this.artifactDeploymentPatterns = artifactDeploymentPatterns;
         this.discardOldBuilds = discardOldBuilds;
-        this.passIdentifiedDownstream = passIdentifiedDownstream;
         this.discardBuildArtifacts = discardBuildArtifacts;
         this.matrixParams = matrixParams;
         this.skipInjectInitScript = skipInjectInitScript;
@@ -141,10 +138,6 @@ public class ArtifactoryGradleConfigurator extends BuildWrapper implements Deplo
 
     public String getMatrixParams() {
         return matrixParams;
-    }
-
-    public boolean isPassIdentifiedDownstream() {
-        return passIdentifiedDownstream;
     }
 
     public boolean isDiscardBuildArtifacts() {

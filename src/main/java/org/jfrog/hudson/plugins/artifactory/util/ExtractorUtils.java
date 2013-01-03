@@ -44,7 +44,6 @@ import org.jfrog.hudson.plugins.artifactory.config.Credentials;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -101,7 +100,6 @@ public class ExtractorUtils {
             ResolverContext resolverContext)
             throws IOException, InterruptedException {
         ArtifactoryClientConfiguration configuration = new ArtifactoryClientConfiguration(new NullLog());
-        addBuildRootIfNeeded(build, configuration);
 
         if (publisherContext != null) {
             setPublisherInfo(env, build, resolverContext, publisherContext, configuration);
@@ -279,15 +277,6 @@ public class ExtractorUtils {
             builder.append(notToDelete).append(",");
         }
         return builder.toString();
-    }
-
-    public static void addBuildRootIfNeeded(AbstractBuild build, ArtifactoryClientConfiguration configuration)
-            throws UnsupportedEncodingException {
-        AbstractBuild<?, ?> rootBuild = BuildUniqueIdentifierHelper.getRootBuild(build);
-        if (rootBuild != null) {
-            String identifier = BuildUniqueIdentifierHelper.getUpstreamIdentifier(rootBuild);
-            configuration.info.setBuildRoot(identifier);
-        }
     }
 
     public static void persistConfiguration(AbstractBuild build, ArtifactoryClientConfiguration configuration,

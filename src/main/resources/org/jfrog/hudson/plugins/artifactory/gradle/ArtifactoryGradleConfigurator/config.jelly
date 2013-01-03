@@ -201,15 +201,6 @@
         </f:block>
         <f:block>
             <table style="width:100%">
-                <f:optionalBlock field="passIdentifiedDownstream"
-                                 help="/plugin/artifactory/help/ArtifactoryGradleConfigurator/help-passIdentifiedDownstream.html"
-                                 title="Enable isolated resolution for downstream builds (requires Artifactory Pro)"
-                                 inline="true">
-                </f:optionalBlock>
-            </table>
-        </f:block>
-        <f:block>
-            <table style="width:100%">
                 <j:if test="${descriptor.jiraPluginEnabled}">
                     <f:optionalBlock name="enableIssueTrackerIntegration"
                                      checked="${instance.enableIssueTrackerIntegration}"
