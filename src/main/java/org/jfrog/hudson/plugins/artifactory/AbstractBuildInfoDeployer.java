@@ -5,16 +5,21 @@ import hudson.model.AbstractBuild;
 import hudson.model.BuildListener;
 import hudson.model.Cause;
 import org.apache.commons.lang.StringUtils;
-import org.jfrog.build.api.*;
+import org.jfrog.build.api.Agent;
+import org.jfrog.build.api.Build;
+import org.jfrog.build.api.BuildAgent;
+import org.jfrog.build.api.BuildInfoProperties;
+import org.jfrog.build.api.BuildRetention;
+import org.jfrog.build.api.BuildType;
+import org.jfrog.build.api.LicenseControl;
 import org.jfrog.build.api.builder.BuildInfoBuilder;
-import org.jfrog.build.api.builder.PromotionStatusBuilder;
-import org.jfrog.build.api.release.Promotion;
 import org.jfrog.build.client.ArtifactoryBuildInfoClient;
 import org.jfrog.build.client.IncludeExcludePatterns;
 import org.jfrog.build.client.PatternMatcher;
 import org.jfrog.hudson.plugins.artifactory.action.ActionableHelper;
 import org.jfrog.hudson.plugins.artifactory.util.BuildRetentionFactory;
 import org.jfrog.hudson.plugins.artifactory.util.ExtractorUtils;
+import org.jfrog.hudson.plugins.artifactory.util.IncludesExcludes;
 
 import java.io.IOException;
 import java.util.Calendar;
@@ -35,7 +40,7 @@ public class AbstractBuildInfoDeployer {
     private EnvVars env;
 
     public AbstractBuildInfoDeployer(BuildInfoAwareConfigurator configurator, AbstractBuild build,
-                                     BuildListener listener, ArtifactoryBuildInfoClient client) throws IOException, InterruptedException {
+            BuildListener listener, ArtifactoryBuildInfoClient client) throws IOException, InterruptedException {
         this.configurator = configurator;
         this.build = build;
         this.listener = listener;
@@ -117,19 +122,20 @@ public class AbstractBuildInfoDeployer {
     }
 
     private void addBuildInfoProperties(BuildInfoBuilder builder) {
-        IncludeExcludePatterns patterns = new IncludeExcludePatterns(
-                configurator.getEnvVarsPatterns().getIncludePatterns(),
-                configurator.getEnvVarsPatterns().getExcludePatterns());
-
         if (configurator.isIncludeEnvVars()) {
-            // First add all build related variables
-            addBuildVariables(builder, patterns);
+            IncludesExcludes envVarsPatterns = configurator.getEnvVarsPatterns();
+            if (envVarsPatterns != null) {
+                IncludeExcludePatterns patterns = new IncludeExcludePatterns(envVarsPatterns.getIncludePatterns(),
+                        envVarsPatterns.getExcludePatterns());
+                // First add all build related variables
+                addBuildVariables(builder, patterns);
 
-            // Then add env variables
-            addEnvVariables(builder, patterns);
+                // Then add env variables
+                addEnvVariables(builder, patterns);
 
-            // And finally add system variables
-            addSystemVariables(builder, patterns);
+                // And finally add system variables
+                addSystemVariables(builder, patterns);
+            }
         }
     }
 
