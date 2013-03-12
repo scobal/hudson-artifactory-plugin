@@ -26,7 +26,7 @@
 
     <groupId>org.eclipse.hudson.plugins</groupId>
     <artifactId>artifactory</artifactId>
-    <version>3.0.2</version>
+    <version>3.0.3-SNAPSHOT</version>
     <packaging>hpi</packaging>
     <name>Hudson Artifactory Plugin</name>
     <description>Integrates Artifactory with Hudson</description>
