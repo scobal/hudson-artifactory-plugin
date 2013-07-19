@@ -36,6 +36,7 @@ import org.jfrog.hudson.plugins.artifactory.action.BuildInfoResultAction;
 import org.jfrog.hudson.plugins.artifactory.config.ArtifactoryServer;
 import org.jfrog.hudson.plugins.artifactory.config.Credentials;
 import org.jfrog.hudson.plugins.artifactory.config.ServerDetails;
+import org.jfrog.hudson.plugins.artifactory.release.UnifiedPromoteBuildAction;
 import org.jfrog.hudson.plugins.artifactory.util.ExtractorUtils;
 import org.jfrog.hudson.plugins.artifactory.util.FormValidations;
 import org.jfrog.hudson.plugins.artifactory.util.IncludesExcludes;
@@ -368,9 +369,9 @@ public class ArtifactoryGradleConfigurator extends BuildWrapper implements Deplo
                                     (BuildableItemWithBuildWrappers) build.getProject(),
                                     ArtifactoryGradleConfigurator.class);
                             if (configurator != null) {
-                                //build.getActions()
-                                //        .add(new UnifiedPromoteBuildAction<ArtifactoryGradleConfigurator>(build,
-                                //                ArtifactoryGradleConfigurator.this));
+                                build.getActions()
+                                        .add(new UnifiedPromoteBuildAction<ArtifactoryGradleConfigurator>(build,
+                                                ArtifactoryGradleConfigurator.this));
                             }
                         }
                     }

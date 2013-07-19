@@ -23,6 +23,7 @@ import hudson.model.Hudson;
 import org.apache.commons.lang.StringUtils;
 import org.jfrog.build.api.util.NullLog;
 import org.jfrog.build.client.*;
+import org.jfrog.hudson.plugins.artifactory.UserPluginInfo;
 import org.jfrog.hudson.plugins.artifactory.util.HudsonBuildInfoLog;
 import org.kohsuke.stapler.DataBoundConstructor;
 
@@ -31,6 +32,7 @@ import java.io.Serializable;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -253,6 +255,38 @@ public class ArtifactoryServer implements Serializable {
         }
 
         return new Credentials(null, null);
+    }
+
+    public List<UserPluginInfo> getPromotionsUserPluginInfo() {
+        List<UserPluginInfo> infosToReturn = Lists.newArrayList(UserPluginInfo.NO_PLUGIN);
+        gatherUserPluginInfo(infosToReturn, "promotions");
+        return infosToReturn;
+    }
+
+    private void gatherUserPluginInfo(List<UserPluginInfo> infosToReturn, String pluginKey) {
+        Credentials resolvingCredentials = getResolvingCredentials();
+        ArtifactoryBuildInfoClient client = createArtifactoryClient(resolvingCredentials.getUsername(),
+                resolvingCredentials.getPassword(), createProxyConfiguration(Hudson.getInstance().proxy));
+        try {
+            Map<String, List<Map>> userPluginInfo = client.getUserPluginInfo();
+            if (userPluginInfo != null && userPluginInfo.containsKey(pluginKey)) {
+                List<Map> stagingUserPluginInfo = userPluginInfo.get(pluginKey);
+                if (stagingUserPluginInfo != null) {
+                    for (Map stagingPluginInfo : stagingUserPluginInfo) {
+                        infosToReturn.add(new UserPluginInfo(stagingPluginInfo));
+                    }
+                    Collections.sort(infosToReturn, new Comparator<UserPluginInfo>() {
+                        public int compare(UserPluginInfo o1, UserPluginInfo o2) {
+                            return o1.getPluginName().compareTo(o2.getPluginName());
+                        }
+                    });
+                }
+            }
+        } catch (IOException e) {
+            log.log(Level.WARNING, "Failed to obtain user plugin info: " + e.getMessage());
+        } finally {
+            client.shutdown();
+        }
     }
 
 }
