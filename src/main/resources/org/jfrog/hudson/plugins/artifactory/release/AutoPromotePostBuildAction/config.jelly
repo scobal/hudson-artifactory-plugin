@@ -2,24 +2,28 @@
 <j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout"
          xmlns:t="/lib/hudson" xmlns:f="/lib/form">
     <f:section title="Auto promote on successful build">
+        <f:dropdownList name="details" title="${%Artifactory server}">
+            <j:forEach var="s" items="${descriptor.artifactoryServers}" varStatus="loop">
+                <f:dropdownListBlock value="${s.name}" title="${s.url}">
+                    <f:entry title="${%Target promotion repository}" field="repositoryKey">
+                        <select class="setting-input" name="repositoryKey">
+                            <j:forEach var="r" items="${s.repositoryKeys}">
+                                <f:option value="${r}">${r}</f:option>
+                            </j:forEach>
+                        </select>
+                    </f:entry>
+                </f:dropdownListBlock>
+            </j:forEach>
+        </f:dropdownList>
         <f:entry title="${%Target status}" field="targetStatus">
             <select class="setting-input" name="targetStatus">
-                <j:forEach var="r" items="${targetStatuses}">
+                <j:forEach var="r" items="${descriptor.targetStatuses}">
                     <f:option value="${r}">${r}</f:option>
                 </j:forEach>
             </select>
         </f:entry>
         <f:entry title="${%Comment}" field="comment">
             <f:textarea name="comment"/>
-        </f:entry>
-        <f:entry title="${%Target promotion repository}" field="repositoryKey">
-            <select class="setting-input" name="repositoryKey">
-                <j:forEach var="r" items="${it.repositoryKeys}">
-                    <f:option selected="${r==it.lastPromotionRepository}"
-                              value="${r}">${r}
-                    </f:option>
-                </j:forEach>
-            </select>
         </f:entry>
         <f:entry field="includeDependencies">
             <f:checkbox default="false" name="includeDependencies"/>

@@ -63,28 +63,12 @@ public class AutoPromotePostBuildAction extends Notifier {
         return BuildStepMonitor.BUILD;
     }
 
-    public List<String> getTargetStatuses() {
-        return Lists.newArrayList(/*"Staged", */"Released", "Rolled-back");
-    }
-
-    public List<String> getRepositoryKeys() {
-
-        ArtifactoryServer artifactoryServer = null;//getArtifactoryServer();
-        if (artifactoryServer == null) {
-            return Lists.newArrayList();
-        }
-        List<String> repos = artifactoryServer.getReleaseRepositoryKeysFirst();
-        repos.add(0, "");  // option not to move
-        return repos;
-    }
-
     @Override
     public boolean perform(AbstractBuild build, Launcher launcher, BuildListener listener) {
         ArtifactoryServer artifactoryServer = getArtifactoryServer(build.getProject());
         Credentials deployer = getDeployerCredentials(artifactoryServer);
         String ciUser = getCiUser();
 
-        targetStatus = "Released";
         repositoryKey = "bi-infrastructure-ng-release-local";
 
         PromotionConfig promotionConfig = new PromotionConfig(targetStatus, repositoryKey, comment, ciUser, useCopy, includeDependencies);
@@ -126,7 +110,13 @@ public class AutoPromotePostBuildAction extends Notifier {
         }
 
         public List<String> getTargetStatuses() {
-            return Lists.newArrayList(/*"Staged", */"Released", "Rolled-back");
+            return Lists.newArrayList("Released");
+        }
+
+        public List<ArtifactoryServer> getArtifactoryServers() {
+            ArtifactoryBuilder.DescriptorImpl descriptor = (ArtifactoryBuilder.DescriptorImpl)
+                    Hudson.getInstance().getDescriptor(ArtifactoryBuilder.class);
+            return descriptor.getArtifactoryServers();
         }
 
     }
