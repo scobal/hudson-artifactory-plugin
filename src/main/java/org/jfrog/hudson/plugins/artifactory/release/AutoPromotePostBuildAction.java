@@ -24,26 +24,26 @@ import java.util.List;
 public class AutoPromotePostBuildAction extends Notifier {
 
     private String targetStatus;
-    private String repositoryKey;
     private String comment;
     private boolean includeDependencies;
     private boolean useCopy;
+    private ArtifactoryRepoDetails details;
 
     @DataBoundConstructor
-    public AutoPromotePostBuildAction(String targetStatus, String repositoryKey, String comment, boolean includeDependencies, boolean useCopy) {
+    public AutoPromotePostBuildAction(String targetStatus, String comment, boolean includeDependencies, boolean useCopy, ArtifactoryRepoDetails details) {
         this.targetStatus = targetStatus;
-        this.repositoryKey = repositoryKey;
         this.comment = comment;
         this.includeDependencies = includeDependencies;
         this.useCopy = useCopy;
+        this.details = details;
+    }
+
+    public ArtifactoryRepoDetails getDetails() {
+        return details;
     }
 
     public String getTargetStatus() {
         return targetStatus;
-    }
-
-    public String getRepositoryKey() {
-        return repositoryKey;
     }
 
     public String getComment() {
@@ -65,11 +65,11 @@ public class AutoPromotePostBuildAction extends Notifier {
 
     @Override
     public boolean perform(AbstractBuild build, Launcher launcher, BuildListener listener) {
+
         ArtifactoryServer artifactoryServer = getArtifactoryServer(build.getProject());
         Credentials deployer = getDeployerCredentials(artifactoryServer);
         String ciUser = getCiUser();
-
-        repositoryKey = "bi-infrastructure-ng-release-local";
+        String repositoryKey = details.getRepoKey();
 
         PromotionConfig promotionConfig = new PromotionConfig(targetStatus, repositoryKey, comment, ciUser, useCopy, includeDependencies);
         ArtifactoryPromoter promoter = new ArtifactoryPromoter(build, null, promotionConfig, artifactoryServer, deployer);
