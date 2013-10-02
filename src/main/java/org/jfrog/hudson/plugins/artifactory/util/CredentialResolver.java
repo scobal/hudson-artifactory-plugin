@@ -39,9 +39,19 @@ public abstract class CredentialResolver {
      * @return Preferred deployment credentials
      */
     public static Credentials getPreferredDeployer(DeployerOverrider overrider, ArtifactoryServer server) {
-        if (overrider.isOverridingDefaultDeployer()) {
+        if (overrider != null && overrider.isOverridingDefaultDeployer()) {
             return overrider.getOverridingDeployerCredentials();
         }
+        return getPreferredDeployer(server);
+    }
+
+    /**
+     * Decides and returns the preferred deployment credentials to use from this builder settings and selected server
+     *
+     * @param server    Selected Artifactory server
+     * @return Preferred deployment credentials
+     */
+    public static Credentials getPreferredDeployer(ArtifactoryServer server) {
 
         if (server != null) {
             Credentials deployerCredentials = server.getDeployerCredentials();
