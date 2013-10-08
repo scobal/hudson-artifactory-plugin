@@ -66,20 +66,23 @@ public class AutoPromotePostBuildAction extends Notifier {
     @Override
     public boolean perform(AbstractBuild build, Launcher launcher, BuildListener listener) {
 
-        ArtifactoryServer artifactoryServer = getArtifactoryServer(build.getProject());
-        Credentials deployer = getDeployerCredentials(artifactoryServer);
-        String ciUser = getCiUser();
-        String repositoryKey = details.getRepoKey();
+        if (build.getResult() == Result.SUCCESS) {
+            ArtifactoryServer artifactoryServer = getArtifactoryServer(build.getProject());
+            Credentials deployer = getDeployerCredentials(artifactoryServer);
+            String ciUser = getCiUser();
+            String repositoryKey = details.getRepoKey();
 
-        PromotionConfig promotionConfig = new PromotionConfig(targetStatus, repositoryKey, comment, ciUser, useCopy, includeDependencies);
-        ArtifactoryPromoter promoter = new ArtifactoryPromoter(build, null, promotionConfig, artifactoryServer, deployer);
-        try {
-            promoter.handlePromotion(listener);
-            return true;
-        } catch (Exception e) {
-            e.printStackTrace(listener.error(e.getMessage()));
-            return false;
+            PromotionConfig promotionConfig = new PromotionConfig(targetStatus, repositoryKey, comment, ciUser, useCopy, includeDependencies);
+            ArtifactoryPromoter promoter = new ArtifactoryPromoter(build, null, promotionConfig, artifactoryServer, deployer);
+            try {
+                return promoter.handlePromotion(listener);
+            } catch (Exception e) {
+                e.printStackTrace(listener.error(e.getMessage()));
+                return false;
+            }
         }
+        listener.getLogger().println("Not auto promoting. Build status was " + build.getResult() + ". Auto promotion requires SUCCESS.");
+        return false;
     }
 
     private Credentials getDeployerCredentials(ArtifactoryServer artifactoryServer) {
@@ -101,7 +104,7 @@ public class AutoPromotePostBuildAction extends Notifier {
 
         @Override
         public String getDisplayName() {
-            return "Auto promote succesful builds";
+            return "Auto promote successful builds";
         }
 
         @Override

@@ -254,7 +254,12 @@ public class UnifiedPromoteBuildAction<C extends BuildInfoAwareConfigurator & De
                 long started = System.currentTimeMillis();
                 listener.getLogger().println("Promoting build ....");
 
-                promoter.handlePromotion(listener);
+                boolean result = promoter.handlePromotion(listener);
+                if (result) {
+                    listener.getLogger().println("Promoting build .... success!");
+                } else {
+                    listener.getLogger().println("Promoting build .... failed!");
+                }
 
                 build.save();
                 // if the client gets back to the progress (after the redirect) page when this thread already done,
