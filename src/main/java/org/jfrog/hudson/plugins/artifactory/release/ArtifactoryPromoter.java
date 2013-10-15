@@ -86,16 +86,38 @@ public class ArtifactoryPromoter {
                 .println("Performing dry run promotion (no changes are made during dry run) ...");
         String buildName = ExtractorUtils.sanitizeBuildName(build.getParent().getFullName());
         String buildNumber = build.getNumber() + "";
-        HttpResponse dryResponse = client.stageBuild(buildName, buildNumber, promotionBuilder.build());
-        if (checkSuccess(dryResponse, true, true, listener)) {
-            listener.getLogger().println("Dry run finished successfully.\nPerforming promotion ...");
-            HttpResponse wetResponse = client.stageBuild(buildName, buildNumber, promotionBuilder.dryRun(false).build());
-            if (checkSuccess(wetResponse, false, true, listener)) {
-                listener.getLogger().println("Promotion completed successfully!");
-                return true;
+
+        // Try and dry promote
+        boolean drySuccess = false;
+        int sleep = 120;
+        int attempts = 10;
+        for (int i = 0; i < attempts && !drySuccess; i++) {
+            HttpResponse dryResponse = client.stageBuild(buildName, buildNumber, promotionBuilder.build());
+            if (checkSuccess(dryResponse, true, true, listener)) {
+                listener.getLogger().println("Dry run attempt " + i + " of " + attempts + " finished successfully.\nPerforming promotion ...");
+                drySuccess = true;
+            } else {
+                listener.getLogger().println("Dry run attempt " + i + " of " + attempts + " failed. Sleeping for " + sleep + " seconds.");
+                try {
+                    Thread.sleep(sleep * 1000);
+                } catch (InterruptedException e) {
+                    listener.getLogger().println(e);
+                }
             }
         }
-        return false;
+        if (!drySuccess) {
+            return false;
+        }
+
+        // Winning! Heeere we go.
+        HttpResponse wetResponse = client.stageBuild(buildName, buildNumber, promotionBuilder.dryRun(false).build());
+        if (checkSuccess(wetResponse, false, true, listener)) {
+            listener.getLogger().println("Promotion completed successfully!");
+            return true;
+        } else {
+            listener.getLogger().println("Promotion failed!");
+            return false;
+        }
     }
 
     /**
